@@ -31,18 +31,19 @@ regr.fit(data_X_train, data_y_train)
 print('Coefficients:', regr.coef_)
 # The mean squared error
 print("Root Mean Squared Error: %.2f"
-      % np.mean((regr.predict(data_X_test) - data_y_test) ** 2))
+      % math.sqrt(np.mean((regr.predict(data_X_test) - data_y_test) ** 2)))
 # Explained variance score: 1 is perfect prediction
 print("Variance score: %.2f" % regr.score(data_X_test, data_y_test))
 
-
 # Plot outputs
-plt.scatter(np.arange(56).reshape(1,56), data_y_test,  color='black')
-plt.scatter(np.arange(56).reshape(1,56), regr.predict(data_X_test),  color='red')
-plt.plot(regr.predict(data_X_test), regr.predict(data_X_test)-data_y_test, color='blue',
-         linewidth=3)
+plt.title('Ordinary Least Square')
+plt.scatter(np.arange(56).reshape(1,56), data_y_test,  color='black', label='actual')
+plt.scatter(np.arange(56).reshape(1,56), regr.predict(data_X_test),  color='red', label='predict')
+plt.plot(np.arange(56).reshape(56,1), abs(regr.predict(data_X_test)-data_y_test), color='blue',
+         linewidth=3, label='residual')
 
-plt.xticks(())
-plt.yticks(())
+plt.legend(loc='upper left')
+plt.xticks([0,14,28,42,56])
+plt.yticks([0,2,4,6,8,10,20,30])
 
 plt.show()

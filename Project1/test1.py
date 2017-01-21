@@ -37,12 +37,9 @@ print("Variance score: %.2f" % regr.score(data_X_test, data_y_test))
 
 # Plot outputs
 plt.title('Original Least Square')
-plt1 = plt.figure(1)
-plt2 = plt.figure(2)
-plt3 = plt.figure(3)
-plt1.scatter(np.arange(56).reshape(1,56), data_y_test,  color='black')
-plt2.scatter(np.arange(56).reshape(1,56), regr.predict(data_X_test),  color='red')
-plt3.plot(np.arange(56).reshape(56,1), regr.predict(data_X_test)-data_y_test, color='blue',
+plt.scatter(np.arange(56).reshape(1,56), data_y_test,  color='black')
+plt.scatter(np.arange(56).reshape(1,56), regr.predict(data_X_test),  color='red')
+plt.plot(np.arange(56).reshape(56,1), regr.predict(data_X_test)-data_y_test, color='blue',
          linewidth=3)
 
 plt.xticks(())
