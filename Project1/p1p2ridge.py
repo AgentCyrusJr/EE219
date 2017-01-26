@@ -2,7 +2,9 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import linear_model
+from sklearn.linear_model import RidgeCV, LassoCV
 from numpy import genfromtxt
+from sklearn.model_selection import train_test_split
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
@@ -13,47 +15,37 @@ row_cut = data_vol/10*9
 col_cut = 13
 train_set_vol = data_vol - row_cut
 
-# Split the data into training/testing sets
-data_X_train 	= my_data[:row_cut,:col_cut]
-data_X_test 	= my_data[row_cut:,:col_cut]
-data_y_train 	= my_data[:row_cut,col_cut]
-data_y_test 	= my_data[row_cut:,col_cut]
+# Setup before the training
+col_cut = 13
+my_feature = my_data[:, :col_cut]
+my_target  = my_data[:, col_cut]
 
-# color options before plot
-colors = ['teal', 'yellowgreen', 'gold', 'red']
+# training begins
+data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=0)
+train_set_vol = len(data_X_test)
+tuningAlpha = [1, 0.1, 0.01, 0.001]
+ridge = RidgeCV(normalize=True, alphas=tuningAlpha, cv=10)
+ridge.fit(data_X_train,data_y_train)
+prediction = ridge.predict(data_X_test)	
+print "optimal alpha: ", ridge.alpha_
+print "optimal coefficients: ", ridge.coef_
+print "best RMSE via 10-fold cross validation: %.3f " %math.sqrt(np.mean((prediction - data_y_test) ** 2))
 
-# Create Ridge regression object with different alpha
-for count, alpha in enumerate([1, 0.1, 0.01, 0.001]):
-	# initial the Ridge Regression
-	rid = linear_model.Ridge(alpha, fit_intercept = False)
-	# Train the model using the training sets
-	rid.fit(data_X_train, data_y_train)
+# Plot the required figure
+plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), prediction, 
+	color='red', linewidth=1, label="alpha %.3f" % ridge.alpha_)
+plt.plot(np.arange(train_set_vol).reshape(train_set_vol,1), abs(prediction-data_y_test), 
+	color='blue', linewidth=1)
 
-	# Attributes of the model
-	# The coefficients
-	print('Coefficients:', rid.coef_)
-	# The root mean squared error
-	print("Root Mean Squared Error: %.6f"
-	      % math.sqrt(np.mean((rid.predict(data_X_test) - data_y_test) ** 2)))
-	# Explained variance score: 1 is perfect prediction
-	print("Variance score: %.6f" % rid.score(data_X_test, data_y_test))
-
-	# Start plot
-	plt.scatter(np.arange(56).reshape(1,56), rid.predict(data_X_test), 
-    	color=colors[count], linewidth=1, label="alpha %.3f" % alpha)
-	plt.plot(np.arange(56).reshape(56,1), abs(rid.predict(data_X_test)-data_y_test), 
-		color=colors[count], linewidth=1)
-
-# Plot the actual points
-plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), data_y_test,  
-	color='black', label='Actual Points', linewidth=2, marker = 'x')
+plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), data_y_test, 
+	color='black', label='Actual Value', linewidth=2, marker = 'x')
 
 # Add up some explanations to the figure
 plt.title('Ridge regression with different $\\alpha$')
-plt.xlabel('$n^{th}$ point')
-plt.ylabel('Predicted Point & Residual')
+plt.xlabel('Actual Value / $n^{th}$ point')
+plt.ylabel('Predicted Value / Residual')
 plt.legend(loc='upper left')
 plt.xticks([0,14,28,42,56])
-plt.yticks([0, 3, 6, 9, 12, 15, 30, 45])
+plt.yticks([0, 3, 6, 9, 12, 15, 30, 45, 60, 75])
 
 plt.show()
