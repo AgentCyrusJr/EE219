@@ -1,61 +1,47 @@
-# Need further modification
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import linear_model
+from sklearn.linear_model import RidgeCV, LassoCV
+from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_score
 from numpy import genfromtxt
+from sklearn.model_selection import train_test_split
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
 
-# Setup before the training, using 10-fold Cross-validation
-data_vol = my_data.shape[0] 
-row_cut = data_vol/10*9
+# Setup before the training
 col_cut = 13
-train_set_vol = data_vol - row_cut
+my_feature = my_data[:, :col_cut]
+my_target  = my_data[:, col_cut]
 
-# Split the data into training/testing sets
-data_X_train 	= my_data[:row_cut,:col_cut]
-data_X_test 	= my_data[row_cut:,:col_cut]
-data_y_train 	= my_data[:row_cut,col_cut]
-data_y_test 	= my_data[row_cut:,col_cut]
+# training begins
+data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=0)
+train_set_vol = len(data_X_test)
+tuningAlpha = [0.1,0.01,0.001]
+lasso = LassoCV(normalize=True, alphas=tuningAlpha, cv=10)
+lasso.fit(data_X_train,data_y_train)
+prediction = lasso.predict(data_X_test)	
+print "optimal alpha: ", lasso.alpha_
+print "optimal coefficients: ", lasso.coef_
+print "best RMSE via 10-fold cross validation: %.3f " %math.sqrt(np.mean((prediction - data_y_test) ** 2))
 
-# color options before plot
-colors = ['blue' ,'green','red']
+# Plot the required figure
+plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), prediction, 
+	color='red', linewidth=1, label="alpha %.3f" % lasso.alpha_)
+plt.plot(np.arange(train_set_vol).reshape(train_set_vol,1), abs(prediction-data_y_test), 
+	color='blue', linewidth=1)
 
-# Create Ridge regression object with different alpha 
-for count, alpha in enumerate([0.01, 0.001, 0.0001]):
-	# initial the Lasso Model
-	lasso = linear_model.Lasso(alpha, fit_intercept = False, max_iter = 100000)
-	# Train the model using the training sets
-	lasso.fit(data_X_train, data_y_train)
-
-	# Attributes of the model
-	# The coefficients
-	print('Coefficients:', lasso.coef_)
-	# The root mean squared error
-	print("Root Mean Squared Error: %.6f"
-	      % math.sqrt(np.mean((lasso.predict(data_X_test) - data_y_test) ** 2)))
-	# Explained variance score: 1 is perfect prediction
-	print("Variance score: %.6f" % lasso.score(data_X_test, data_y_test))
-
-	# Start plot
-	plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), lasso.predict(data_X_test), 
-    	color=colors[count], linewidth=1, label="alpha %.5f" % alpha)
-	plt.plot(np.arange(56).reshape(56,1), abs(lasso.predict(data_X_test)-data_y_test), 
-		color=colors[count], linewidth=1)
-
-
-# Plot the actual points
-plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), data_y_test,  
-	color='black', label='Actual Points', linewidth=2, marker = 'x')
+plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), data_y_test, 
+	color='black', label='Actual Value', linewidth=2, marker = 'x')
 
 # Add up some explanations to the figure
 plt.title('Lasso with different $\\alpha$')
-plt.xlabel('$n^{th}$ point')
-plt.ylabel('Predicted Point & Residual')
+plt.xlabel('Actual Value / $n^{th}$ point')
+plt.ylabel('Predicted Value / Residual')
 plt.legend(loc='upper left')
 plt.xticks([0,14,28,42,56])
-plt.yticks([0, 3, 6, 9, 12, 15, 30, 45])
+plt.yticks([0, 3, 6, 9, 12, 15, 30, 45, 60, 75])
 
 plt.show()
