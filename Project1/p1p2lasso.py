@@ -3,10 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import linear_model
 from sklearn.linear_model import RidgeCV, LassoCV
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import cross_val_score
-from numpy import genfromtxt
 from sklearn.model_selection import train_test_split
+from numpy import genfromtxt
+import random
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
@@ -17,9 +16,9 @@ my_feature = my_data[:, :col_cut]
 my_target  = my_data[:, col_cut]
 
 # training begins
-data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=0)
+data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=random.randrange(0, 100))
 train_set_vol = len(data_X_test)
-tuningAlpha = [0.1,0.01,0.001]
+tuningAlpha = [0.1, 0.01, 0.001]
 lasso = LassoCV(normalize=True, alphas=tuningAlpha, cv=10)
 lasso.fit(data_X_train,data_y_train)
 prediction = lasso.predict(data_X_test)	

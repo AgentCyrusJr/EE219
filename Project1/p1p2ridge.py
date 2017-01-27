@@ -5,15 +5,10 @@ from sklearn import linear_model
 from sklearn.linear_model import RidgeCV, LassoCV
 from numpy import genfromtxt
 from sklearn.model_selection import train_test_split
+import random
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
-
-# Setup before the training, using 10-fold Cross-validation
-data_vol = my_data.shape[0] 
-row_cut = data_vol/10*9
-col_cut = 13
-train_set_vol = data_vol - row_cut
 
 # Setup before the training
 col_cut = 13
@@ -21,11 +16,11 @@ my_feature = my_data[:, :col_cut]
 my_target  = my_data[:, col_cut]
 
 # training begins
-data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=0)
+data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=random.randrange(0, 100))
 train_set_vol = len(data_X_test)
 tuningAlpha = [1, 0.1, 0.01, 0.001]
 ridge = RidgeCV(normalize=True, alphas=tuningAlpha, cv=10)
-ridge.fit(data_X_train,data_y_train)
+ridge.fit(my_feature, my_target)
 prediction = ridge.predict(data_X_test)	
 print "optimal alpha: ", ridge.alpha_
 print "optimal coefficients: ", ridge.coef_

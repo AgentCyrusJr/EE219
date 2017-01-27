@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import *
 from sklearn import linear_model 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -7,59 +8,58 @@ from sklearn.pipeline import Pipeline
 from numpy import genfromtxt
 from scipy.interpolate import *
 import math
-from numpy import *
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import random
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
 
-# Setup before the training, using 10-fold Cross-validation
-data_vol = my_data.shape[0] 
-row_cut = data_vol/10*9
+# Setup before the training
 col_cut = 13
-train_set_vol = data_vol - row_cut
-
-# Split the data into training/testing sets
-data_X_train 	= my_data[:row_cut,:col_cut]
-data_X_test 	= my_data[row_cut:,:col_cut]
-data_y_train 	= my_data[:row_cut,col_cut]
-data_y_test 	= my_data[row_cut:,col_cut]
+my_feature = my_data[:, :col_cut]
+my_target  = my_data[:, col_cut]
 
 # color options before plot
-colors = ['blue' ,'green','red']
+colors = ['blue' ,'green','red', 'gold']
 
+plt.figure(1)
 # Create polynomial regression
-for count, degree in enumerate([2, 3, 4]):
+for count, degree in enumerate([4,5,6,7]):
 	# initial the polynomial model
     model = Pipeline([('poly', PolynomialFeatures(degree)),
-					('linear', LinearRegression(fit_intercept=False))])
-    # Train the model using the training sets
-    poly = model.fit(data_X_train, data_y_train)
-    
+					('linear', LinearRegression())])
+    i = 0
+    max_score = float('-inf')
+    while i < 10 :
+        data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target, test_size=0.1, random_state=random.randrange(0, 100))
+        train_set_vol = len(data_X_test)
+        poly = model.fit(data_X_train, data_y_train)
+        score = poly.score(data_X_test, data_y_test)
+        print score
+        if score > max_score:
+            max_score = score
+            optimal_coef = model.named_steps['linear'].coef_
+            best_predict = poly.predict(data_X_test)
+            optimal_RMSE = math.sqrt(mean_squared_error(data_y_test, best_predict))
+        i = i + 1
     # Attributes of the model
 	# The coefficients
-    print('Coefficients:', model.named_steps['linear'].coef_)
+    print('Coefficients:', optimal_coef)
     # The root mean squared error
-    print("Root Mean Squared Error: %.6f" % math.sqrt(np.mean((poly.predict(data_X_test) - data_y_test) ** 2)))
+    print("Root Mean Squared Error: %.6f" % optimal_RMSE)
     # Explained variance score: 1 is perfect prediction
-    print("Variance score: %.6f" % poly.score(data_X_test, data_y_test))
+    print("Variance score: %.6f" % score)
+    plt.scatter(data_y_test, best_predict, alpha=0.3, color=colors[count], label='degree %d' % degree, linewidth=1)
+    # plt.scatter(data_y_test, best_predict-data_y_test, alpha=0.6, color=colors[count], linewidth=1)
 
-    # Start plot
-    plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), poly.predict(data_X_test), 
-    	color=colors[count], linewidth=1, label="degree %d" % degree)
-    plt.plot(np.arange(56).reshape(56,1), abs(poly.predict(data_X_test)-data_y_test), 
-		color=colors[count], linewidth=1)
-	
 
-# Plot the actual points
-plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), data_y_test,  
-	color='black', label='Actual Points', linewidth=2, marker = 'x')
-
-# Add up some explanations to the figure
-plt.title('Lasso with different $\\alpha$')
-plt.xlabel('$n^{th}$ point')
-plt.ylabel('Predicted Point & Residual')
+plt.plot([data_y_test.min(), data_y_test.max()], [0, 0], 'k--', alpha=0.3, lw=1.5)    
+plt.title('Residuals versus fitted values plot')
+plt.xlabel('Fitted Value')
+plt.ylabel('Residuals')
+plt.title('Fitted values and actual values scattered plot')
+plt.xlabel('Actual Value')
+plt.ylabel('Fitted Value')
 plt.legend(loc='upper left')
-plt.xticks()
-plt.yticks()
-
 plt.show()

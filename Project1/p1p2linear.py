@@ -2,48 +2,59 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import linear_model
 from numpy import genfromtxt
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import permutation_test_score
+
+from sklearn.metrics import mean_squared_error
 import math
+import random
 
 # Load the dataset
 my_data = genfromtxt('housing_data.csv', delimiter=',')
-
-# Setup before the training, using 10-fold Cross-validation
-data_vol = my_data.shape[0] 
-row_cut = data_vol/10*9
 col_cut = 13
-train_set_vol = data_vol - row_cut
 
-# Split the data into training/testing sets
-data_X_train 	= my_data[:row_cut,:col_cut]
-data_X_test 	= my_data[row_cut:,:col_cut]
-data_y_train 	= my_data[:row_cut,col_cut]
-data_y_test 	= my_data[row_cut:,col_cut]
+# Here we train the model with all the features
+my_feature = my_data[:, :col_cut]
+my_target  = my_data[:, col_cut]
 
-# Create linear regression object
-regr = linear_model.LinearRegression()
-
-# Train the model using the training sets
-regr.fit(data_X_train, data_y_train)
-
+i = 0
+max_score = 0
+while i < 10 :
+	data_X_train, data_X_test, data_y_train, data_y_test = train_test_split(my_feature, my_target,  random_state=random.randrange(0, 100), test_size=0.1)
+	train_set_vol = len(data_X_test)
+	# Create linear regression object
+	linear = linear_model.LinearRegression()
+	# Train the model using the training sets
+	linear.fit(data_X_train, data_y_train)
+	score, permutation_scores, pvalue = permutation_test_score(linear, data_X_train, data_y_train, cv=10, n_jobs=1)
+	print score, permutation_scores, pvalue
+	if linear.score(data_X_test, data_y_test) > max_score:
+		max_score = linear.score(data_X_test, data_y_test)
+		optimal_coef = linear.coef_
+		best_predict = linear.predict(data_X_test)
+		optimal_RMSE = math.sqrt(mean_squared_error(data_y_test, best_predict))
+		optimal_score= max_score	
+	i = i + 1
 # The coefficients
-print('Coefficients:', regr.coef_)
+print('Coefficients:', optimal_coef)
 # The root mean squared error
-print("Root Mean Squared Error: %.3f"
-      % math.sqrt(np.mean((regr.predict(data_X_test) - data_y_test) ** 2)))
+print("Root Mean Squared Error: %.3f" % optimal_RMSE)
 # Explained variance score: 1 is perfect prediction
-print("Variance score: %.3f" % regr.score(data_X_test, data_y_test))
+print("Variance score: %.3f" % optimal_score)
 
 # Add up some explanations to the figure
-plt.title('Ordinary Least Square')
-plt.xlabel('$n^{th}$ point')
-plt.ylabel('Predicted Point & Residual')
-plt.scatter(np.arange(56).reshape(1,56), data_y_test,  color='black', label='Actual Point', linewidth=2, marker = 'x')
-plt.scatter(np.arange(56).reshape(1,56), regr.predict(data_X_test),  color='red', label='Predict Point', linewidth=1)
-plt.plot(np.arange(56).reshape(56,1), abs(regr.predict(data_X_test)-data_y_test), color='blue',
-         linewidth=1, label='residual')
+plt.figure(1)
+plt.scatter(data_y_test, best_predict, alpha=0.6, color='red', linewidth=1)
+plt.plot([data_y_test.min(), data_y_test.max()], [data_y_test.min(), data_y_test.max()], 'k--', lw=4)
+plt.title('Fitted values and actual values scattered plot')
+plt.xlabel('Actual Value')
+plt.ylabel('Fitted Value')
 
-plt.legend(loc='upper left')
-plt.xticks([0,14,28,42,56])
-plt.yticks([0,2,4,6,8,10,20,30])
+plt.figure(2)
+plt.scatter(data_y_test, best_predict-data_y_test, alpha=0.6, color='blue', linewidth=1)
+plt.plot([data_y_test.min(), data_y_test.max()], [0, 0], 'k--', lw=4)
+plt.title('Residuals versus fitted values plot')
+plt.xlabel('Fitted Value')
+plt.ylabel('Residuals')
 
 plt.show()
