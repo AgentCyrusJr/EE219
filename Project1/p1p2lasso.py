@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import linear_model
 from sklearn.linear_model import RidgeCV, LassoCV
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 from numpy import genfromtxt
 import random
 
@@ -25,6 +26,7 @@ prediction = lasso.predict(data_X_test)
 print "optimal alpha: ", lasso.alpha_
 print "optimal coefficients: ", lasso.coef_
 print "best RMSE via 10-fold cross validation: %.3f " %math.sqrt(np.mean((prediction - data_y_test) ** 2))
+print "best r2_score:", r2_score(data_y_test, prediction)
 
 # Plot the required figure
 plt.scatter(np.arange(train_set_vol).reshape(1,train_set_vol), prediction, 

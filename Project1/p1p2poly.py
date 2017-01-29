@@ -10,6 +10,7 @@ from sklearn import cross_validation, linear_model
 import math
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 import random
 
 # Load the dataset
@@ -60,6 +61,7 @@ for deg in range(len(degrees)):
     predicted = lm.predict(X_test_trans)
 
     rmse.append(np.mean(abs(predicted-data_y_test)**0.5))
+    print "best r2_score:", r2_score(data_y_test, predicted)
 
 plt.figure(1)
 plt.scatter(degrees,rmse)

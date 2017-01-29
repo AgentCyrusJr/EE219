@@ -4,7 +4,7 @@ from sklearn import linear_model
 from numpy import genfromtxt
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import permutation_test_score
-
+from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 import math
 import random
@@ -32,7 +32,7 @@ while i < 10 :
 		max_score = linear.score(data_X_test, data_y_test)
 		optimal_coef = linear.coef_
 		best_predict = linear.predict(data_X_test)
-		optimal_RMSE = math.sqrt(mean_squared_error(data_y_test, best_predict))
+		optimal_RMSE = math.sqrt(mean_squared_error(data_X_test, data_y_test))
 		optimal_score= max_score	
 	i = i + 1
 # The coefficients
@@ -41,6 +41,7 @@ print('Coefficients:', optimal_coef)
 print("Root Mean Squared Error: %.3f" % optimal_RMSE)
 # Explained variance score: 1 is perfect prediction
 print("Variance score: %.3f" % optimal_score)
+print "best r2_score:", r2_score(data_y_test, best_predict)
 
 # Add up some explanations to the figure
 plt.figure(1)
