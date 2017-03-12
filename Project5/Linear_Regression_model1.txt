@@ -1,0 +1,31 @@
+tweet_data/tweets_#superbowl.txt
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.779
+Model:                            OLS   Adj. R-squared:                  0.778
+Method:                 Least Squares   F-statistic:                     676.1
+Date:                Sat, 11 Mar 2017   Prob (F-statistic):          4.87e-311
+Time:                        12:58:24   Log-Likelihood:                -9828.1
+No. Observations:                 962   AIC:                         1.967e+04
+Df Residuals:                     957   BIC:                         1.969e+04
+Df Model:                           5                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [95.0% Conf. Int.]
+------------------------------------------------------------------------------
+x1             0.6208      0.289      2.148      0.032         0.054     1.188
+x2             0.8573      0.155      5.546      0.000         0.554     1.161
+x3            -0.0003    1.8e-05    -16.748      0.000        -0.000    -0.000
+x4             0.0015    9.9e-05     14.949      0.000         0.001     0.002
+x5           -49.0050     17.033     -2.877      0.004       -82.430   -15.580
+==============================================================================
+Omnibus:                      919.537   Durbin-Watson:                   2.427
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):           616187.041
+Skew:                           3.381   Prob(JB):                         0.00
+Kurtosis:                     126.802   Cond. No.                     7.31e+06
+==============================================================================
+
+Warnings:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 7.31e+06. This might indicate that there are
+strong multicollinearity or other numerical problems.
